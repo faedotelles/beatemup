@@ -30,7 +30,7 @@ function desenhaCeu(){
 }
 
 function desenhaAsfalto(){
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "black";
     var larguraFaixa = 80;
     for(i = 50; i < larguraTotal; i += (larguraFaixa * 2) ){
         ctx.fillRect(i,meioChao - 10,larguraFaixa,20)
