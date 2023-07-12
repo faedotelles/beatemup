@@ -71,16 +71,16 @@ function desenhaBloco() {
     ctxPlayer.fillRect(posX, posY, larguraBoneco, alturaBoneco);
 }
 
-function atualizaPosicao(sentido) {
-    if (sentido == 'ArrowLeft') {
+function atualizaPosicao(tecla) {
+    if (tecla == 'KeyA') {
         targetX -= passos;
-    } else if (sentido == 'ArrowRight') {
+    } else if (tecla == 'KeyD') {
         targetX += passos;
-    } else if (sentido == 'ArrowUp') {
+    } else if (tecla == 'KeyW') {
         if(targetY > alturaCeu - alturaBoneco + 30){
             targetY -= passos;
         }
-    } else if (sentido == 'ArrowDown') {
+    } else if (tecla == 'KeyS') {
         targetY += passos;
     }
 }
@@ -99,10 +99,22 @@ function loop() {
 }
 
 document.addEventListener('keydown', (event) => {
-    if (event.key == 'ArrowRight' || event.key == 'ArrowLeft' || event.key == 'ArrowUp' || event.key == 'ArrowDown') {
-        atualizaPosicao(event.key);
-        
+   
+    if(event.code == 'KeyW'){
+        atualizaPosicao(event.code)
+    } else if(event.code == 'KeyS') {
+        atualizaPosicao(event.code)
+    }  else if(event.code == 'KeyA') {
+        atualizaPosicao(event.code)
+    } else if (event.code == 'KeyD') {
+        atualizaPosicao(event.code)
+    } else if (event.code == 'Space') {
+        atualizaPosicao(event.code)
     }
+      
+    
+   console.log(event)
+    
 });
 
 loop();
