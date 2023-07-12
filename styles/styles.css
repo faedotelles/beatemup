@@ -1,0 +1,19 @@
+.screen{
+    width: 1881px;
+    height: 970px;
+    position: absolute;
+    background-color: black;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);; 
+}
+.canvas{
+    position: absolute;
+}
+#cenario{
+    z-index: 1;
+}
+
+#player{
+    z-index: 5;
+}
