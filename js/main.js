@@ -200,9 +200,11 @@ function atualizaPosicao(teclas){
         
     }
      if (teclas['KeyS']){
-        if(!targetY - passos > alturaTotal - alturaBoneco - 60){
+        if(targetY - passos > alturaTotal - alturaBoneco - 60){
+            // nao faz nada
+        } else {
             targetY += passos;
-        }  
+        }
     }      
     if (teclas['Space']){
         targetY -= 50;
