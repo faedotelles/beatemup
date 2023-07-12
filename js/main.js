@@ -20,6 +20,8 @@ const meioChao = alturaCeu + (alturaChao / 2);
 
 
 var passos = 30
+var stamina = 100;
+
 
 function desenhaCeu(){
     ctx.fillStyle = "#87ceeb";
@@ -39,14 +41,6 @@ function desenhaAsfalto(){
 }
 
 
-
-
-
-
-
-
-
-var xTeste = 0
 
 var larguraBoneco = 80;
 var alturaBoneco = 150
@@ -82,6 +76,9 @@ function atualizaPosicao(tecla) {
         }
     } else if (tecla == 'KeyS') {
         targetY += passos;
+    } else if (tecla == 'Space'){
+        targetY -= 150
+        esperar(600).then( () => {targetY += 150} )
     }
 }
 
@@ -111,10 +108,62 @@ document.addEventListener('keydown', (event) => {
     } else if (event.code == 'Space') {
         atualizaPosicao(event.code)
     }
-      
-    
-   console.log(event)
-    
 });
 
+
+var correndo = false;
+
+
+document.addEventListener('keydown', (event) => {
+    if(event.code == 'ShiftLeft'){
+        correndo = true;
+        drenarStamina()
+    }
+})
+
+document.addEventListener('keyup', (event) => {
+    if(event.code == 'ShiftLeft'){
+        correndo = false;
+        resetarStamina();
+    }
+})
+
+function drenarStamina(){
+    const intervalId = setInterval(() =>{
+        stamina -= 3;
+        desenhaStamina();
+       if(stamina > 0){
+        passos = 70
+       } else {
+        passos = 25
+       }
+        if(!correndo){
+            clearInterval(intervalId);
+            resetarStamina()
+        }
+    }, 100)
+}
+
+function resetarStamina(){
+    passos = 25;
+    stamina = 100
+}
+
+
+var staminaCanvas = document.querySelector('#stamina');
+var ctxStamina = staminaCanvas.getContext('2d');
+function desenhaStamina(){
+    if(stamina > 0){
+    ctxStamina.clearRect(0, 0, staminaCanvas.width, staminaCanvas.height);
+    ctxStamina.fillStyle = "orange";
+    ctxStamina.fillRect(50, 50, stamina * 2, 50)
+    };
+    
+}
 loop();
+
+desenhaStamina()
+
+function esperar(time) {
+    return new  Promise(resolve => setTimeout(resolve, time));
+}
