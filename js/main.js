@@ -65,38 +65,6 @@ function desenhaBloco() {
     ctxPlayer.fillRect(posX, posY, larguraBoneco, alturaBoneco);
 }
 
-function atualizaPosicao(movimento) {
-    if (movimento === 'diagonal-cima-direita') {
-        targetX += passos;
-        if (targetY > alturaCeu - alturaBoneco + 30) {
-            if (targetY - passos < 445) {
-                targetY = 445;
-            } else {
-                targetY -= passos;
-            }
-        }
-    } else if (movimento === 'esquerda') {
-        targetX -= passos;
-    } else if (movimento === 'direita') {
-        targetX += passos;
-    } else if (movimento === 'cima') {
-        if (targetY > alturaCeu - alturaBoneco + 30) {
-            if (targetY - passos < 445) {
-                targetY = 445;
-            } else {
-                targetY -= passos;
-            }
-        }
-    } else if (movimento === 'baixo') {
-        targetY += passos;
-    } else if (movimento === 'pulo') {
-        targetY -= 150;
-        esperar(600).then(() => {
-            targetY += 150;
-        });
-    }
-}
-
 
 function interpolar() {
     var dx = targetX - posX;
@@ -131,26 +99,12 @@ document.addEventListener('keydown', (event) => {
    if(keysPressed['KeyW'] && keysPressed['KeyD']){
     atualizaPosicao('direita-cima');
    }
-
-    //// Refaturei
-    // if(keyPressed['KeyW']){
-    //     atualizaPosicao(keyMapping[event.code])
-    // } else if(event.code == 'KeyS') {
-    //     atualizaPosicao(keyMapping[event.code])
-    // }  else if(event.code == 'KeyA') {
-    //     atualizaPosicao(keyMapping[event.code])
-    // } else if (keyPressed['KeyD']) {
-    //     atualizaPosicao(keyMapping[event.code])
-    // } else if (event.code == 'Space') {
-    //     atualizaPosicao(keyMapping[event.code])
-    // }
 });
 
 
 
 document.addEventListener('keyup', (event) => {
     delete keysPressed[event.code];
-
      if (keysPressed['KeyW'] && keysPressed['KeyD']) {
         atualizaPosicao('diagonal-cima-direita');
     } else if (keysPressed['KeyW']) {
@@ -166,9 +120,6 @@ document.addEventListener('keyup', (event) => {
     }
 
 })
-
-
-
 
 var correndo = false;
 
@@ -225,4 +176,42 @@ desenhaStamina()
 
 function esperar(time) {
     return new  Promise(resolve => setTimeout(resolve, time));
+}
+
+
+
+setInterval(() => {
+    atualizaPosicao(keysPressed)
+}, 50);
+
+function atualizaPosicao(teclas){
+    if(teclas['KeyD']){
+        targetX += passos;
+    }
+    if (teclas['KeyA']){
+        targetX -= passos;
+    } 
+    if (teclas['KeyW']){
+        if(targetY - passos < alturaChao + (alturaBoneco/ 2) - 20){
+            // targetY = alturaChao + (alturaBoneco/ 2) - 20;
+        } else {
+            targetY -= passos;
+        }
+        
+    }
+     if (teclas['KeyS']){
+        if(!targetY - passos > alturaTotal - alturaBoneco - 60){
+            targetY += passos;
+        }  
+    }      
+    if (teclas['Space']){
+        targetY -= 50;
+        esperar(600).then(() => {
+            if(targetY + 50 > targetY - passos > alturaTotal - alturaBoneco - 60){
+                targetY = targetY - passos > alturaTotal - alturaBoneco - 60
+            } else {
+                targetY+= 50
+            };
+        });
+    }
 }
