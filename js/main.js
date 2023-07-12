@@ -65,22 +65,6 @@ function desenhaBloco() {
     ctxPlayer.fillRect(posX, posY, larguraBoneco, alturaBoneco);
 }
 
-function atualizaPosicao(tecla) {
-    if (tecla == 'KeyA') {
-        targetX -= passos;
-    } else if (tecla == 'KeyD') {
-        targetX += passos;
-    } else if (tecla == 'KeyW') {
-        if(targetY > alturaCeu - alturaBoneco + 30){
-            targetY -= passos;
-        }
-    } else if (tecla == 'KeyS') {
-        targetY += passos;
-    } else if (tecla == 'Space'){
-        targetY -= 150
-        esperar(600).then( () => {targetY += 150} )
-    }
-}
 
 function interpolar() {
     var dx = targetX - posX;
@@ -95,21 +79,47 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
+let keysPressed = {};
+
+let keyMapping = {
+    'KeyW': 'cima',
+    'KeyD': 'direita',
+    'KeyS': 'baixo',
+    'KeyA': 'esquerda',
+    'Space': 'pulo'
+}
+
 document.addEventListener('keydown', (event) => {
-   
-    if(event.code == 'KeyW'){
-        atualizaPosicao(event.code)
-    } else if(event.code == 'KeyS') {
-        atualizaPosicao(event.code)
-    }  else if(event.code == 'KeyA') {
-        atualizaPosicao(event.code)
-    } else if (event.code == 'KeyD') {
-        atualizaPosicao(event.code)
-    } else if (event.code == 'Space') {
-        atualizaPosicao(event.code)
-    }
+   keysPressed[event.code] = true;
+   console.log(keysPressed)
+
+   if(event.code in keyMapping){
+    atualizaPosicao(keyMapping[event.code]);
+   }
+   if(keysPressed['KeyW'] && keysPressed['KeyD']){
+    atualizaPosicao('direita-cima');
+   }
 });
 
+
+
+document.addEventListener('keyup', (event) => {
+    delete keysPressed[event.code];
+     if (keysPressed['KeyW'] && keysPressed['KeyD']) {
+        atualizaPosicao('diagonal-cima-direita');
+    } else if (keysPressed['KeyW']) {
+        atualizaPosicao('KeyW');
+    } else if (keysPressed['KeyS']) {
+        atualizaPosicao('KeyS');
+    } else if (keysPressed['KeyA']) {
+        atualizaPosicao('KeyA');
+    } else if (keysPressed['KeyD']) {
+        atualizaPosicao(keyMapping['KeyD']);
+    } else if (keysPressed['Space']) {
+        atualizaPosicao('Space');
+    }
+
+})
 
 var correndo = false;
 
@@ -166,4 +176,44 @@ desenhaStamina()
 
 function esperar(time) {
     return new  Promise(resolve => setTimeout(resolve, time));
+}
+
+
+
+setInterval(() => {
+    atualizaPosicao(keysPressed)
+}, 50);
+
+function atualizaPosicao(teclas){
+    if(teclas['KeyD']){
+        targetX += passos;
+    }
+    if (teclas['KeyA']){
+        targetX -= passos;
+    } 
+    if (teclas['KeyW']){
+        if(targetY - passos < alturaChao + (alturaBoneco/ 2) - 20){
+            // targetY = alturaChao + (alturaBoneco/ 2) - 20;
+        } else {
+            targetY -= passos;
+        }
+        
+    }
+     if (teclas['KeyS']){
+        if(targetY - passos > alturaTotal - alturaBoneco - 60){
+            // nao faz nada
+        } else {
+            targetY += passos;
+        }
+    }      
+    if (teclas['Space']){
+        targetY -= 50;
+        esperar(600).then(() => {
+            if(targetY + 50 > targetY - passos > alturaTotal - alturaBoneco - 60){
+                targetY = targetY - passos > alturaTotal - alturaBoneco - 60
+            } else {
+                targetY+= 50
+            };
+        });
+    }
 }
