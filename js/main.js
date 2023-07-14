@@ -1,24 +1,30 @@
 const screen = document.querySelector('.screen');
 const screenPosition = screen.getBoundingClientRect();
 
-
 const canva = document.querySelector('#cenario');
 const ctx = canva.getContext('2d');
 
 
-//aqui irei desenhar o personagem
-
+// Dimensoes
 const alturaTotal = 970;
 const larguraTotal = 1920;
-
 const proporcaoTela = 60;
-
 const alturaCeu = alturaTotal * proporcaoTela / 100;
 const alturaChao = alturaTotal - alturaCeu;
 const meioChao = alturaCeu + (alturaChao / 2);
 
+// Variaveis de Jogabilidade
+var puloAltura = 200;
+var puloTempo = puloAltura * 2;
+var larguraBoneco = 80;
+var alturaBoneco = 150
+var eixoX = 30
+var eixoY = alturaTotal - alturaBoneco - 30
+let keysPressed = {};
 
-
+//Variaveis do Boenco
+var pulando = false;
+var correndo = false;
 var passos = 30
 var stamina = 100;
 
@@ -40,17 +46,7 @@ function desenhaAsfalto(){
     
 }
 
-
-
-var larguraBoneco = 80;
-var alturaBoneco = 150
-
-var eixoX = 30
-var eixoY = alturaTotal - alturaBoneco - 30
-
-desenhaCeu()
-desenhaAsfalto()
-
+// Player
 var playerCanvas = document.querySelector('#player');
 var ctxPlayer = playerCanvas.getContext('2d');
 var posX = larguraBoneco / 2;
@@ -65,7 +61,6 @@ function desenhaBloco() {
     ctxPlayer.fillRect(posX, posY, larguraBoneco, alturaBoneco);
 }
 
-
 function interpolar() {
     var dx = targetX - posX;
     var dy = targetY - posY;
@@ -79,87 +74,44 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-let keysPressed = {};
-
-let keyMapping = {
-    'KeyW': 'cima',
-    'KeyD': 'direita',
-    'KeyS': 'baixo',
-    'KeyA': 'esquerda',
-    'Space': 'pulo'
-}
-
-document.addEventListener('keydown', (event) => {
-   keysPressed[event.code] = true;
-   console.log(keysPressed)
-
-   if(event.code in keyMapping){
-    atualizaPosicao(keyMapping[event.code]);
-   }
-   if(keysPressed['KeyW'] && keysPressed['KeyD']){
-    atualizaPosicao('direita-cima');
-   }
-});
-
-
-
 document.addEventListener('keyup', (event) => {
     delete keysPressed[event.code];
-     if (keysPressed['KeyW'] && keysPressed['KeyD']) {
-        atualizaPosicao('diagonal-cima-direita');
-    } else if (keysPressed['KeyW']) {
-        atualizaPosicao('KeyW');
-    } else if (keysPressed['KeyS']) {
-        atualizaPosicao('KeyS');
-    } else if (keysPressed['KeyA']) {
-        atualizaPosicao('KeyA');
-    } else if (keysPressed['KeyD']) {
-        atualizaPosicao(keyMapping['KeyD']);
-    } else if (keysPressed['Space']) {
-        atualizaPosicao('Space');
+    if(event.code == 'ShiftLeft'){
+        correndo = false;
     }
-
 })
 
-var correndo = false;
 
 
 document.addEventListener('keydown', (event) => {
+    keysPressed[event.code] = true;d
     if(event.code == 'ShiftLeft'){
         correndo = true;
         drenarStamina()
     }
 })
 
-document.addEventListener('keyup', (event) => {
-    if(event.code == 'ShiftLeft'){
-        correndo = false;
-        resetarStamina();
-    }
-})
-
 function drenarStamina(){
     const intervalId = setInterval(() =>{
-        stamina -= 3;
-        desenhaStamina();
-       if(stamina > 0){
-        passos = 70
-       } else {
-        passos = 25
+        if(stamina >= 10){
+            // stamina -=10;
+            for(var i = 0; i < 10; i ++){
+                setTimeout(() => {
+                stamina -= 1;
+                desenhaStamina();
+            }, 5);
+}
+            passos = 50
+        }else {
+        passos = 30
        }
         if(!correndo){
             clearInterval(intervalId);
-            resetarStamina()
         }
-    }, 100)
+    }, 50)
 }
 
-function resetarStamina(){
-    passos = 25;
-    stamina = 100
-}
-
-
+//Stamina
 var staminaCanvas = document.querySelector('#stamina');
 var ctxStamina = staminaCanvas.getContext('2d');
 function desenhaStamina(){
@@ -170,19 +122,18 @@ function desenhaStamina(){
     };
     
 }
-loop();
-
-desenhaStamina()
 
 function esperar(time) {
     return new  Promise(resolve => setTimeout(resolve, time));
 }
 
-
-
 setInterval(() => {
     atualizaPosicao(keysPressed)
-}, 50);
+    desenhaStamina()
+    if(stamina < 100){
+        stamina ++
+    }
+}, 50); 
 
 function atualizaPosicao(teclas){
     if(teclas['KeyD']){
@@ -192,28 +143,36 @@ function atualizaPosicao(teclas){
         targetX -= passos;
     } 
     if (teclas['KeyW']){
-        if(targetY - passos < alturaChao + (alturaBoneco/ 2) - 20){
-            // targetY = alturaChao + (alturaBoneco/ 2) - 20;
-        } else {
+        if(!(targetY - passos < alturaChao + (alturaBoneco/ 2) - 20)){
             targetY -= passos;
-        }
-        
+        } 
     }
+
      if (teclas['KeyS']){
-        if(targetY - passos > alturaTotal - alturaBoneco - 60){
-            // nao faz nada
-        } else {
-            targetY += passos;
+        var safeZone = alturaTotal - alturaBoneco - 40;
+        if(pulando){
+            safeZone -= puloAltura
         }
+        if(targetY < safeZone){
+            targetY += passos;
+        } 
     }      
     if (teclas['Space']){
-        targetY -= 50;
-        esperar(600).then(() => {
-            if(targetY + 50 > targetY - passos > alturaTotal - alturaBoneco - 60){
-                targetY = targetY - passos > alturaTotal - alturaBoneco - 60
-            } else {
-                targetY+= 50
-            };
+        if(!pulando){
+            targetY -= puloAltura;
+        pulando = true;
+        esperar(puloTempo).then(() => {
+            targetY += puloAltura
+        }).then(() =>{
+           esperar(puloTempo).then(
+            ()=>{ pulando = false;}
+           )
         });
+        }
     }
 }
+
+desenhaCeu()
+desenhaAsfalto()
+loop();
+desenhaStamina()
